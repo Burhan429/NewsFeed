@@ -16,14 +16,17 @@ import java.util.UUID;
 public class FutureProgram {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private long id;
     private String title;
     private String link;
     private String description;
-
     @Lob
-    private String image;
+    private String photo;
     @Temporal(TemporalType.DATE)
     private Calendar date;
 
+
+    public void setDecodedPhoto(byte[] photoBytes) {
+        getPhoto();
+    }
 }
