@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 @Repository
-public interface FutureProgramRepository extends JpaRepository<FutureProgram , UUID> {
+public interface FutureProgramRepository extends JpaRepository<FutureProgram , Long> {
 
 }
