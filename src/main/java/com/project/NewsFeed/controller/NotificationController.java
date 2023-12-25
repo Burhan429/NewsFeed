@@ -18,7 +18,7 @@ public class NotificationController {
         notificationRequest.setId(UUID.randomUUID().toString());
         return notificationService.createNotify(notificationRequest);
     }
-    @GetMapping("/getById/{id}")
+    @GetMapping("get/{id}")
     public Notification getNotifyById(@PathVariable String id){
         return notificationService.getNotifyById(id);
     }
