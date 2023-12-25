@@ -26,6 +26,7 @@ public void addProgram(String title, String description, MultipartFile photo, St
     program.setTitle(title);
     program.setDescription(description);
     program.setLink(link);
+    System.out.println("This is my link " + link);
     program.setDate(Calendar.getInstance());
 
     // Save the photo to a specific directory
