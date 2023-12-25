@@ -2,90 +2,127 @@ package com.project.NewsFeed.service;
 
 import com.project.NewsFeed.entity.Event;
 
-import com.project.NewsFeed.entity.Notification;
-import com.project.NewsFeed.model.EventRequest;
-import com.project.NewsFeed.model.EventResponse;
 import com.project.NewsFeed.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.List;
-import java.util.UUID;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 @Service
 public class EventService {
     @Autowired
     private EventRepository eventRepository;
 
-    public String createEvent(EventRequest eventRequest) {
+    public void createEvent(String title, String description, MultipartFile photo, String link) throws IOException {
         Event event = new Event();
-        event.setEventId(eventRequest.getEventId());
-        event.setEventTitle(eventRequest.getEventTitle());
-        event.setEventLink(eventRequest.getEventLink());
-        event.setEventDescription(eventRequest.getEventDescription());
+        event.setTitle(title);
+        event.setDescription(description);
+        event.setLink(link);
+        event.setDate(Calendar.getInstance());
 
-        MultipartFile file = eventRequest.getEventImage();
-        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
-        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
-        String uniqueFileName = UUID.randomUUID() + "." + fileExtension;
-        event.setEventImage(uniqueFileName);
+        // Save the photo to a specific directory
+        String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+        String photoDirectory = "C:\\Projects\\NewsFeed\\src\\main\\resources\\images\\";
+        String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
 
-        String base64EventImage = Base64.getEncoder().encodeToString(originalFileName.getBytes());
-        event.setEventImage(base64EventImage);
+        Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
 
-        event.setCreatedDate(Calendar.getInstance());
+        // Set the photo path in the event
+        event.setPhotoPath(photoPath);
+
         eventRepository.save(event);
-        return "Event Saved";
     }
 
-
-
-    public Event getEventById(String eventId) {
-        Event event = eventRepository.findById(eventId).orElse(null);
-
+    public Resource getPhotoAsResource(Long id) throws IOException {
+        Event event = eventRepository.findById(id).orElse(null);
         if (event != null) {
-            EventResponse eventResponse = new EventResponse();
+            Path photoPath = Paths.get(event.getPhotoPath());
+            Resource resource = new ByteArrayResource(Files.readAllBytes(photoPath));
+            return resource;
+        }
+        return null;
+    }
 
-            byte[] imageBytes = Base64.getDecoder().decode(event.getEventImage());
-            String encodedImage = new String(Base64.getEncoder().encode(imageBytes), StandardCharsets.UTF_8);
+    public Event getEventById(Long id) {
+        return eventRepository.findById(id).orElse(null);
+    }
 
-            eventResponse.setEventImage(encodedImage);
-            eventResponse.setEventId(event.getEventId());
-            eventResponse.setEventLink(event.getEventLink());
-            eventResponse.setEventTitle(event.getEventTitle());
-            eventResponse.setEventDescription(event.getEventDescription());
+    public List<Map<String, Object>> getAllEventsWithPhotoUrls() {
+        List<Event> allEvents = eventRepository.findAll();
 
-            return event;
+        if (allEvents != null && !allEvents.isEmpty()) {
+            List<Map<String, Object>> responseList = new ArrayList<>();
+
+            for (Event event : allEvents) {
+                String photoUrl = "/downloadPhoto/image/" + event.getId(); // URL to download the photo
+
+                Map<String, Object> eventMap = new HashMap<>();
+                eventMap.put("photoUrl", photoUrl);
+                eventMap.put("id", event.getId());
+                eventMap.put("title", event.getTitle());
+                eventMap.put("link", event.getLink());
+                eventMap.put("description", event.getDescription());
+                eventMap.put("photoPath", event.getPhotoPath());
+                eventMap.put("date", event.getDate());
+
+                responseList.add(eventMap);
+            }
+
+            return responseList;
         } else {
-            // Handle the case where the event is not found
-            return null;
+            return Collections.emptyList();
         }
     }
 
+    public String deleteEvent(Long id) {
+        eventRepository.deleteById(id);
+        return "Event Deleted  ID: "+id;
+    }
 
+    public void updateById(Long id, String title, String description, MultipartFile photo, String link) throws IOException {
+        // Retrieve the existing event by ID
+        Event existingEvent = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
 
+        // Update the event with the new values
+        existingEvent.setTitle(title);
+        existingEvent.setDescription(description);
+        existingEvent.setLink(link);
+        existingEvent.setDate(Calendar.getInstance());
 
+        // Convert and set the new photo if provided
+        if (photo != null && !photo.isEmpty()) {
+            // Save the new photo to the specified directory
+            String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+            String photoDirectory = "C:\\Projects\\NewsFeed\\src\\main\\resources\\images\\";
+            String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
 
-    public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+            Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
+
+            // Set the photo path in the event
+            existingEvent.setPhotoPath(photoPath);
+        }
+
+        // Save the updated event back to the repository
+        eventRepository.save(existingEvent);
     }
 
 
-    public String deleteEvent(String eventId) {
-        eventRepository.deleteById(eventId);
-        return "Event Deleted  ID: "+eventId;
-    }
+
 }
+
+
+
+
+
