@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,7 @@ public class EventController {
     }
 
     @GetMapping("/getEvent/{id}")
-    public ResponseEntity<Map<String, Object>> downloadPhoto(@PathVariable Long id) throws IOException {
+    public ResponseEntity<Map<String, Object>> getEvent (@PathVariable Long id) throws IOException {
         Event event = eventService.getEventById(id);
         Resource resource = eventService.getPhotoAsResource(id);
 
