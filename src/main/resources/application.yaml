@@ -28,5 +28,4 @@ spring:
   profiles:
     active: dev
 
-upload:
-  directory: C:\\Projects\\NewsFeed\\src\\main\\resources\\images
+
