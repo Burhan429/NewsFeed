@@ -20,13 +20,7 @@ public class FutureProgram {
     private String title;
     private String link;
     private String description;
-    @Lob
-    private String photo;
+    private String photoPath;
     @Temporal(TemporalType.DATE)
     private Calendar date;
-
-
-    public void setDecodedPhoto(byte[] photoBytes) {
-        getPhoto();
-    }
 }
