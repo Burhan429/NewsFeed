@@ -46,7 +46,7 @@ public ResponseEntity<String> addProgram(@RequestParam("title") String title,
         return new ResponseEntity<>(programs, HttpStatus.OK);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/updateProgram/{id}")
     public ResponseEntity<String> updateProgram(
             @RequestParam long id ,
             @RequestParam String title,
