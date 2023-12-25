@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import javax.persistence.*;
 import java.util.Calendar;
 
@@ -11,16 +12,17 @@ import java.util.Calendar;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Event {
-    @Id
-    private String eventId;
-    private String eventTitle;
-    private String eventLink;
-    private String eventDescription;
-    private String eventImage;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Calendar createdDate;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Calendar updateDate;
+   @Id
+   @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String title;
+    private String link;
+    private String description;
+    private String photoPath;
+    @Temporal(TemporalType.DATE)
+    private Calendar date;
+
 
 }
