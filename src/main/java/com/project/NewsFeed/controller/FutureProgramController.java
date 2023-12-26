@@ -39,6 +39,7 @@ public class FutureProgramController {
         Resource resource = programService.getPhotoAsResource(id);
 
         if (futureProgram != null && resource != null) {
+//            String photoUrl = "/downloadProgramPhoto/image/" + id; // URL to download the photo
             String photoUrl = "/downloadProgramPhoto/image/" + id; // URL to download the photo
 
             Map<String, Object> response = new HashMap<>();
@@ -119,6 +120,11 @@ public class FutureProgramController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+    @DeleteMapping("/deleteByProgramId/{id}")
+    public String deleeteProgram(@PathVariable Long id){
+        programService.deleteById(id);
+        return "Deleted Successfully";
     }
 
 
