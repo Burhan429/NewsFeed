@@ -1,9 +1,6 @@
 package com.project.NewsFeed.controller;
 
-import com.project.NewsFeed.entity.Event;
 import com.project.NewsFeed.entity.FutureProgram;
-import com.project.NewsFeed.model.EventRequest;
-import com.project.NewsFeed.model.FutureProgramRequest;
 import com.project.NewsFeed.repository.FutureProgramRepository;
 import com.project.NewsFeed.service.FutureProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class FutureProgramController {
@@ -43,6 +39,7 @@ public class FutureProgramController {
         Resource resource = programService.getPhotoAsResource(id);
 
         if (futureProgram != null && resource != null) {
+//            String photoUrl = "/downloadProgramPhoto/image/" + id; // URL to download the photo
             String photoUrl = "/downloadProgramPhoto/image/" + id; // URL to download the photo
 
             Map<String, Object> response = new HashMap<>();
@@ -123,6 +120,11 @@ public class FutureProgramController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+    @DeleteMapping("/deleteByProgramId/{id}")
+    public String deleeteProgram(@PathVariable Long id){
+        programService.deleteById(id);
+        return "Deleted Successfully";
     }
 
 
