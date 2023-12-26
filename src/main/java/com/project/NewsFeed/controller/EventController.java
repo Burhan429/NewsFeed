@@ -87,7 +87,6 @@ public class EventController {
     }
 
 
-
     @PutMapping("/updateEvent/{id}")
     public ResponseEntity<Map<String, Object>> updateEvent(
             @PathVariable Long id,
