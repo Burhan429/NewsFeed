@@ -5,10 +5,12 @@ import com.project.NewsFeed.entity.Event;
 import com.project.NewsFeed.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.io.IOException;
@@ -66,7 +68,6 @@ public class EventService {
 
             for (Event event : allEvents) {
                 String photoUrl = "/downloadPhoto/image/" + event.getId(); // URL to download the photo
-
                 Map<String, Object> eventMap = new HashMap<>();
                 eventMap.put("photoUrl", photoUrl);
                 eventMap.put("id", event.getId());
