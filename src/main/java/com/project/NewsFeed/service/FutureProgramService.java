@@ -3,6 +3,7 @@ package com.project.NewsFeed.service;
 import com.project.NewsFeed.entity.Event;
 import com.project.NewsFeed.entity.FutureProgram;
 import com.project.NewsFeed.repository.FutureProgramRepository;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -12,37 +13,48 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
+import static java.nio.file.Files.delete;
+
 @Service
 public class FutureProgramService {
     @Autowired
     FutureProgramRepository programRepository;
-public void addProgram(String title, String description, MultipartFile photo, String link) throws IOException {
+public void addProgram(String title, String description, List<MultipartFile> photos, String link) throws IOException {
     FutureProgram program = new FutureProgram();
     program.setTitle(title);
     program.setDescription(description);
     program.setLink(link);
-    System.out.println("This is my link " + link);
     program.setDate(Calendar.getInstance());
+    List<String> photoPaths = new ArrayList<>();
 
-    // Save the photo to a specific directory
-    String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
     String photoDirectory = "C:\\Project\\NewsFeed\\src\\main\\resources\\images";
+    Files.createDirectories(Paths.get(photoDirectory));
 
+    for (MultipartFile photo : photos) {  // Save The Photo to the Specific Directory
+        String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+        String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+        try (OutputStream outputStream = new FileOutputStream(photoPath)){
 
-    String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+           IOUtils.copy(photo.getInputStream(), outputStream);
 
-    Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
+    }
+        photoPaths.add(photoPath);
 
-    program.setPhotoPath(photoPath);
+    String concatenatedPhotoPaths = String.join("," , photoPaths);
+
+    program.setPhotoPath(concatenatedPhotoPaths);
     programRepository.save(program);
+
 }
+}
+
     public Resource getPhotoAsResource(Long id) throws IOException {
         FutureProgram  futureProgram = programRepository.findById(id).orElse(null);
         if (futureProgram != null) {
@@ -52,6 +64,7 @@ public void addProgram(String title, String description, MultipartFile photo, St
         }
         return null;
     }
+
     public FutureProgram getProgramById(Long id) {
         return programRepository.findById(id).orElse(null);
     }

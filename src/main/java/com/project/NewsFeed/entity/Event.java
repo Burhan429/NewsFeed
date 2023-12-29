@@ -3,10 +3,12 @@ package com.project.NewsFeed.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.w3c.dom.stylesheets.LinkStyle;
 
 
 import javax.persistence.*;
 import java.util.Calendar;
+import java.util.List;
 
 @Entity
 @Data

@@ -9,13 +9,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 @RestController
 public class FutureProgramController {
@@ -28,8 +31,8 @@ public class FutureProgramController {
     public ResponseEntity<String> createEvent(@RequestParam("title") String title,
                                               @RequestParam("link") String link,
                                               @RequestParam("description") String description,
-                                              @RequestParam("photo") MultipartFile photo) throws IOException {
-        programService.addProgram(title, description, photo, link);
+                                              @RequestParam("photo") List<MultipartFile> photos) throws IOException {
+        programService.addProgram(title, description, photos, link);
         return ResponseEntity.ok("Newsfeed item added successfully");
     }
 
@@ -39,7 +42,7 @@ public class FutureProgramController {
         Resource resource = programService.getPhotoAsResource(id);
 
         if (futureProgram != null && resource != null) {
-//            String photoUrl = "/downloadProgramPhoto/image/" + id; // URL to download the photo
+
             String photoUrl = "/downloadProgramPhoto/image/" + id; // URL to download the photo
 
             Map<String, Object> response = new HashMap<>();
@@ -58,6 +61,15 @@ public class FutureProgramController {
             return ResponseEntity.notFound().build();
         }
     }
+//    @PostMapping("/saveAllPrograms")
+//    public ResponseEntity<String> saveAllEvents(@RequestParam("title") List<String> title,
+//                                                @RequestParam("link") List<String> link,
+//                                                @RequestParam("description") List<String> description,
+//                                                @RequestParam("photo") List<MultipartFile> photo) throws IOException {
+//        programService.createAllPrograms(title,link,description,photo);
+//        return ResponseEntity.ok("All Programs are added");
+//    }
+
 
     @GetMapping("/downloadProgramPhoto/image/{id}")
     public ResponseEntity<Resource> downloadImage(@PathVariable Long id) throws IOException {

@@ -29,9 +29,22 @@ public class EventController {
         eventService.createEvent(title, description, photo, link);
         return ResponseEntity.ok("Newsfeed item added successfully");
     }
+    @PostMapping("/multipleImage")
+    public ResponseEntity<String> createEvent(
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("photos") List<MultipartFile> photos,
+            @RequestParam("link") String link) throws IOException {
+
+
+            eventService.multipleImage(title, description, photos, link);
+            return  ResponseEntity.ok("Multiple Images created ");
+
+    }
+
 
     @PostMapping("/saveAllEvents")
-    public ResponseEntity<String> saveAllEvents(@RequestParam("title") List<String> title,
+    public ResponseEntity<String> saveAllEvents (@RequestParam("title") List<String> title,
                                                 @RequestParam("link") List<String> link,
                                                 @RequestParam("description") List<String> description,
                                                 @RequestParam("photo") List<MultipartFile> photo) throws IOException {
@@ -132,8 +145,10 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
-
-
+//    @GetMapping("/photoPaths/{id}")
+//    public ResponseEntity<List<String>> getPhotoPaths(@PathVariable Long id) {
+//        List<String> photoPaths = eventService.getPhotoPathsById(id);
+//        return ResponseEntity.ok(photoPaths);
+//
+//    }
 }
