@@ -46,6 +46,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
+
     public Resource getPhotoAsResource(Long id) throws IOException {
         Event event = eventRepository.findById(id).orElse(null);
         if (event != null) {
@@ -120,6 +121,32 @@ public class EventService {
     }
 
 
+    public void createAllEvents(List<String> titles, List<String> links, List<String> descriptions, List<MultipartFile> photos) throws IOException {
+        List<Event> events = new ArrayList<>();
+
+        for (int i = 0; i < titles.size(); i++) {
+            Event event = new Event();
+            event.setTitle(titles.get(i));
+            event.setDescription(descriptions.get(i));
+            event.setLink(links.get(i));
+            event.setDate(Calendar.getInstance());
+
+            // Save the photo to a specific directory
+            MultipartFile photo = photos.get(i);
+            String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+            String photoDirectory = "C:\\Projects\\NewsFeed\\src\\main\\resources\\images\\";
+            String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+
+            Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
+
+            // Set the photo path in the event
+            event.setPhotoPath(photoPath);
+
+            events.add(event);
+        }
+
+        eventRepository.saveAll(events);
+    }
 
 }
 

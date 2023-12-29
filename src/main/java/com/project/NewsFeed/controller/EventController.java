@@ -30,6 +30,15 @@ public class EventController {
         return ResponseEntity.ok("Newsfeed item added successfully");
     }
 
+    @PostMapping("/saveAllEvents")
+    public ResponseEntity<String> saveAllEvents(@RequestParam("title") List<String> title,
+                                                @RequestParam("link") List<String> link,
+                                                @RequestParam("description") List<String> description,
+                                                @RequestParam("photo") List<MultipartFile> photo) throws IOException {
+        eventService.createAllEvents(title,link,description,photo);
+        return ResponseEntity.ok("All Events are added");
+    }
+
     @GetMapping("/getEvent/{id}")
     public ResponseEntity<Map<String, Object>> getEvent (@PathVariable Long id) throws IOException {
         Event event = eventService.getEventById(id);
