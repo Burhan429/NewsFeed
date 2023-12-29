@@ -23,11 +23,20 @@ public class EventController {
     private EventService eventService;
     @PostMapping("/createEvent")
     public ResponseEntity<String> createEvent(@RequestParam("title") String title,
-                                             @RequestParam("link") String link,
-                                             @RequestParam("description") String description,
-                                             @RequestParam("photo") MultipartFile photo) throws IOException {
+                                              @RequestParam("link") String link,
+                                              @RequestParam("description") String description,
+                                              @RequestParam("photo") MultipartFile photo) throws IOException {
         eventService.createEvent(title, description, photo, link);
         return ResponseEntity.ok("Newsfeed item added successfully");
+    }
+
+    @PostMapping("/saveAllEvents")
+    public ResponseEntity<String> saveAllEvents(@RequestParam("title") List<String> title,
+                                                @RequestParam("link") List<String> link,
+                                                @RequestParam("description") List<String> description,
+                                                @RequestParam("photo") List<MultipartFile> photo) throws IOException {
+        eventService.createAllEvents(title,link,description,photo);
+        return ResponseEntity.ok("All Events are added");
     }
 
     @GetMapping("/getEvent/{id}")
@@ -36,8 +45,8 @@ public class EventController {
         Resource resource = eventService.getPhotoAsResource(id);
 
         if (event != null && resource != null) {
-            String photoUrl = "/downloadPhoto/image/" + id; // URL to download the photo
 
+            String photoUrl = "/downloadPhoto/image/" + id; // URL to download the photo
             Map<String, Object> response = new HashMap<>();
             response.put("photoUrl", photoUrl);
             response.put("id", event.getId());
@@ -87,8 +96,7 @@ public class EventController {
     }
 
 
-
-    @PutMapping("/update/{id}")
+    @PutMapping("/updateEvent/{id}")
     public ResponseEntity<Map<String, Object>> updateEvent(
             @PathVariable Long id,
             @RequestParam String title,

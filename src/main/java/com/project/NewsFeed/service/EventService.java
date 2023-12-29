@@ -5,10 +5,12 @@ import com.project.NewsFeed.entity.Event;
 import com.project.NewsFeed.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
+
     public Resource getPhotoAsResource(Long id) throws IOException {
         Event event = eventRepository.findById(id).orElse(null);
         if (event != null) {
@@ -66,7 +69,6 @@ public class EventService {
 
             for (Event event : allEvents) {
                 String photoUrl = "/downloadPhoto/image/" + event.getId(); // URL to download the photo
-
                 Map<String, Object> eventMap = new HashMap<>();
                 eventMap.put("photoUrl", photoUrl);
                 eventMap.put("id", event.getId());
@@ -119,6 +121,32 @@ public class EventService {
     }
 
 
+    public void createAllEvents(List<String> titles, List<String> links, List<String> descriptions, List<MultipartFile> photos) throws IOException {
+        List<Event> events = new ArrayList<>();
+
+        for (int i = 0; i < titles.size(); i++) {
+            Event event = new Event();
+            event.setTitle(titles.get(i));
+            event.setDescription(descriptions.get(i));
+            event.setLink(links.get(i));
+            event.setDate(Calendar.getInstance());
+
+            // Save the photo to a specific directory
+            MultipartFile photo = photos.get(i);
+            String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+            String photoDirectory = "C:\\Projects\\NewsFeed\\src\\main\\resources\\images\\";
+            String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+
+            Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
+
+            // Set the photo path in the event
+            event.setPhotoPath(photoPath);
+
+            events.add(event);
+        }
+
+        eventRepository.saveAll(events);
+    }
 
 }
 

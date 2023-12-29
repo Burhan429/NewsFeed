@@ -5,10 +5,12 @@ import com.project.NewsFeed.entity.FutureProgram;
 import com.project.NewsFeed.repository.FutureProgramRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,11 +28,14 @@ public void addProgram(String title, String description, MultipartFile photo, St
     program.setTitle(title);
     program.setDescription(description);
     program.setLink(link);
+    System.out.println("This is my link " + link);
     program.setDate(Calendar.getInstance());
 
     // Save the photo to a specific directory
     String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
     String photoDirectory = "C:\\Project\\NewsFeed\\src\\main\\resources\\images";
+
+
     String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
 
     Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
@@ -107,9 +112,9 @@ public void addProgram(String title, String description, MultipartFile photo, St
     }
 
 
-//    public void deleteById(Long id) {
-//        programRepository.deleteById(id);
-//    }
+    public void deleteById(Long id) {
+        programRepository.deleteById(id);
+    }
 
 
 
