@@ -3,6 +3,7 @@ package com.project.NewsFeed.service;
 import com.project.NewsFeed.entity.Event;
 
 import com.project.NewsFeed.repository.EventRepository;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -13,8 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -147,6 +150,52 @@ public class EventService {
 
         eventRepository.saveAll(events);
     }
+
+public void multipleImage(String title, String description, List<MultipartFile> photos, String link) throws IOException {
+    Event event = new Event();
+    event.setTitle(title);
+    event.setDescription(description);
+    event.setLink(link);
+    event.setDate(Calendar.getInstance());
+
+    List<String> photoPaths = new ArrayList<>();
+
+    String photoDirectory = "C:\\Projects\\NewsFeed\\src\\main\\resources\\images\\";
+    Files.createDirectories(Paths.get(photoDirectory));
+
+
+    for (MultipartFile photo : photos) {
+        String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+        String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+
+        try (OutputStream outputStream = new FileOutputStream(photoPath)) {
+
+            IOUtils.copy(photo.getInputStream(), outputStream);
+        }
+
+        photoPaths.add(photoPath);
+    }
+
+    // Concatenate photo paths into a single string
+    String concatenatedPhotoPaths = String.join(",", photoPaths);
+
+    // Set the concatenated photo paths in the event
+    event.setPhotoPath(concatenatedPhotoPaths);
+
+    // Assuming eventRepository is an instance of JpaRepository or a similar interface
+    eventRepository.save(event);
+}
+
+
+//    public List<String> getPhotoPathsById(Long id) {
+//        String concatenatedPaths = eventRepository.findPhotoPathsById(id);
+//        return Arrays.asList(concatenatedPaths.split(",");
+//    }
+
+
+
+
+
 
 }
 
