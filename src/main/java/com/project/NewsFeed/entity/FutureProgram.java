@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.Calendar;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -20,13 +21,10 @@ public class FutureProgram {
     private String title;
     private String link;
     private String description;
-    @Lob
-    private String photo;
+    @Column(columnDefinition="text")
+    private String photoPath;
     @Temporal(TemporalType.DATE)
     private Calendar date;
 
 
-    public void setDecodedPhoto(byte[] photoBytes) {
-        getPhoto();
-    }
 }

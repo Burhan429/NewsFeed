@@ -1,58 +1,102 @@
 package com.project.NewsFeed.service;
 
+import com.project.NewsFeed.entity.Event;
 import com.project.NewsFeed.entity.FutureProgram;
 import com.project.NewsFeed.repository.FutureProgramRepository;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.List;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
+
+import static java.nio.file.Files.delete;
 
 @Service
 public class FutureProgramService {
     @Autowired
     FutureProgramRepository programRepository;
-public void addProgram(String title, String description, MultipartFile photo, String link) throws IOException {
+public void addProgram(String title, String description, List<MultipartFile> photos, String link) throws IOException {
     FutureProgram program = new FutureProgram();
     program.setTitle(title);
     program.setDescription(description);
     program.setLink(link);
     program.setDate(Calendar.getInstance());
+    List<String> photoPaths = new ArrayList<>();
 
-    // Convert photo to Base64
-    byte[] imageData = photo.getBytes();
-    String encodedString = Base64.getEncoder().encodeToString(imageData);
-    program.setPhoto(encodedString);
+    String photoDirectory = "C:\\Project\\NewsFeed\\src\\main\\resources\\images";
+    Files.createDirectories(Paths.get(photoDirectory));
+
+    for (MultipartFile photo : photos) {  // Save The Photo to the Specific Directory
+        String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+        String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+        try (OutputStream outputStream = new FileOutputStream(photoPath)){
+
+           IOUtils.copy(photo.getInputStream(), outputStream);
+
+    }
+        photoPaths.add(photoPath);
+
+    String concatenatedPhotoPaths = String.join("," , photoPaths);
+
+    program.setPhotoPath(concatenatedPhotoPaths);
     programRepository.save(program);
+
 }
-    public FutureProgram getProgramById(long id) {
-        FutureProgram program = programRepository.findById(id).orElse(null);
+}
 
-        if (program != null && program.getPhoto() != null) {
-            String base64Photo = program.getPhoto();
-
-            try {
-                byte[] photoBytes = Base64.getDecoder().decode(base64Photo);
-                program.setDecodedPhoto(photoBytes);
-                return program;
-            } catch (Exception e) {
-
-                e.printStackTrace();
-            }
+    public Resource getPhotoAsResource(Long id) throws IOException {
+        FutureProgram  futureProgram = programRepository.findById(id).orElse(null);
+        if (futureProgram != null) {
+            Path photoPath = Paths.get(futureProgram.getPhotoPath());
+            Resource resource = new ByteArrayResource(Files.readAllBytes(photoPath));
+            return resource;
         }
-
         return null;
     }
 
-    public
-    List<FutureProgram> getAllPrograms() {
-        return programRepository.findAll();
+    public FutureProgram getProgramById(Long id) {
+        return programRepository.findById(id).orElse(null);
     }
 
-    public void updateById(long id ,String title, String description, MultipartFile photo, String link) throws IOException {
+    public List<Map<String, Object>> getAllFutureProgramsWithPhotoUrls() {
+        List<FutureProgram> allPrograms = programRepository.findAll();
+
+        if (!allPrograms.isEmpty()) {
+            List<Map<String, Object>> responseList = new ArrayList<>();
+
+            for (FutureProgram futureProgram : allPrograms) {
+                String photoUrl = "/downloadProgramPhoto/image/" + futureProgram.getId(); // URL to download the photo
+
+                Map<String, Object> programMap = new HashMap<>();
+                programMap.put("photoUrl", photoUrl);
+                programMap.put("id", futureProgram.getId());
+                programMap.put("title", futureProgram.getTitle());
+                programMap.put("link", futureProgram.getLink());
+                programMap.put("description", futureProgram.getDescription());
+                programMap.put("photoPath", futureProgram.getPhotoPath());
+                programMap.put("date", futureProgram.getDate());
+
+                responseList.add(programMap);
+            }
+
+            return responseList;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    public void updateById(Long id, String title, String description, MultipartFile photo, String link) throws IOException {
         // Retrieve the existing program by ID
         FutureProgram existingProgram = programRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Program not found with id: " + id));
@@ -65,9 +109,15 @@ public void addProgram(String title, String description, MultipartFile photo, St
 
         // Convert and set the new photo if provided
         if (photo != null && !photo.isEmpty()) {
-            byte[] imageData = photo.getBytes();
-            String encodedString = Base64.getEncoder().encodeToString(imageData);
-            existingProgram.setPhoto(encodedString);
+            // Save the new photo to the specified directory
+            String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+            String photoDirectory = "C:\\Project\\NewsFeed\\src\\main\\resources\\images";
+            String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+
+            Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
+
+            // Set the photo path in the program
+            existingProgram.setPhotoPath(photoPath);
         }
 
         // Save the updated program back to the repository
