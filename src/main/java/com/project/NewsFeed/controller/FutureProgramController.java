@@ -1,8 +1,6 @@
 package com.project.NewsFeed.controller;
 
-import com.project.NewsFeed.entity.Event;
 import com.project.NewsFeed.entity.FutureProgram;
-import com.project.NewsFeed.service.EventService;
 import com.project.NewsFeed.service.FutureProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
