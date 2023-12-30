@@ -22,7 +22,6 @@ public class Notification {
     private String description;
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar date;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Calendar updateDate;
+
 
 }

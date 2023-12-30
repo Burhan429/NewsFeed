@@ -5,14 +5,11 @@ import java.util.Calendar;
 
 @Data
 public class EventResponse {
-    private String id;
-
+    private Long id;
     private String title;
     private String link;
     private String description;
-    private String image;
-
-    private Calendar createdDate;
-    private Calendar updateDate;
+    private String photoPath;
+    private Calendar date;
 
 }
