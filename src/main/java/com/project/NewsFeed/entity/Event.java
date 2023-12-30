@@ -3,7 +3,6 @@ package com.project.NewsFeed.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 
 import javax.persistence.*;
@@ -22,7 +21,8 @@ public class Event {
     private String title;
     private String link;
     private String description;
-    private String photoPath;
+    @ElementCollection
+    private List<String> photoPath;
     @Temporal(TemporalType.DATE)
     private Calendar date;
 
