@@ -1,7 +1,6 @@
 package com.project.NewsFeed.model;
 
 import lombok.Data;
-
 import java.util.Calendar;
 
 @Data

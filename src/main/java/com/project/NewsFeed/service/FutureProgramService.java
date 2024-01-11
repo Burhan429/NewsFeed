@@ -4,83 +4,72 @@ import com.project.NewsFeed.entity.FutureProgram;
 import com.project.NewsFeed.repository.FutureProgramRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 @Service
 public class FutureProgramService {
     @Autowired
     FutureProgramRepository programRepository;
-public void addProgram(String title, String description, MultipartFile photo, String link) throws IOException {
-    FutureProgram program = new FutureProgram();
-    program.setTitle(title);
-    program.setDescription(description);
-    program.setLink(link);
-    program.setDate(Calendar.getInstance());
+    public void createFutureProgram(String title, String description, List<MultipartFile> photos, String link) throws IOException {
+        FutureProgram futureProgram = new FutureProgram();
+        futureProgram.setTitle(title);
+        futureProgram.setDescription(description);
+        futureProgram.setLink(link);
+        futureProgram.setDate(Calendar.getInstance());
 
-    // Convert photo to Base64
-    byte[] imageData = photo.getBytes();
-    String encodedString = Base64.getEncoder().encodeToString(imageData);
-    program.setPhoto(encodedString);
-    programRepository.save(program);
-}
-    public FutureProgram getProgramById(long id) {
-        FutureProgram program = programRepository.findById(id).orElse(null);
+        List<String> photoPaths = new ArrayList<>();
 
-        if (program != null && program.getPhoto() != null) {
-            String base64Photo = program.getPhoto();
+        for (MultipartFile photo : photos)
+        {
+            String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+            String photoDirectory = "C:\\Projects\\NewsFeed\\src\\main\\resources\\images\\";
+            String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
 
-            try {
-                byte[] photoBytes = Base64.getDecoder().decode(base64Photo);
-                program.setDecodedPhoto(photoBytes);
-                return program;
-            } catch (Exception e) {
-
-                e.printStackTrace();
-            }
+            Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
+            photoPaths.add(photoPath);      //Add the photo path to the list
         }
-
-        return null;
+        futureProgram.setPhotoPath(photoPaths);    //Set the list of photo paths in the futureProgram
+        programRepository.save(futureProgram);
     }
 
-    public
-    List<FutureProgram> getAllPrograms() {
+    public List<FutureProgram> getAllFuturePrograms() {
         return programRepository.findAll();
     }
 
-    public void updateById(long id ,String title, String description, MultipartFile photo, String link) throws IOException {
-        // Retrieve the existing program by ID
-        FutureProgram existingProgram = programRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Program not found with id: " + id));
-
-        // Update the program with the new values
-        existingProgram.setTitle(title);
-        existingProgram.setDescription(description);
-        existingProgram.setLink(link);
-        existingProgram.setDate(Calendar.getInstance());
-
-        // Convert and set the new photo if provided
-        if (photo != null && !photo.isEmpty()) {
-            byte[] imageData = photo.getBytes();
-            String encodedString = Base64.getEncoder().encodeToString(imageData);
-            existingProgram.setPhoto(encodedString);
-        }
-
-        // Save the updated program back to the repository
-        programRepository.save(existingProgram);
+    public FutureProgram getFutureProgram(Long id) {
+        return programRepository.findById(id).orElse(null);
     }
 
 
-    public void deleteById(Long id) {
+    public void updatedFutureProgram(Long id, String title, String description, String link, List<MultipartFile> photos) throws IOException {
+        FutureProgram existingFutureProgram = programRepository.findById(id).get();
+        existingFutureProgram.setTitle(title);
+        existingFutureProgram.setDescription(description);
+        existingFutureProgram.setLink(link);
+        List<String> photoPaths = new ArrayList<>();
+
+        for (MultipartFile photo : photos) {
+
+            String photoFileName = StringUtils.cleanPath(Objects.requireNonNull(photo.getOriginalFilename()));
+            String photoDirectory = "C:\\Projects\\NewsFeed\\src\\main\\resources\\images\\";
+            String photoPath = photoDirectory + UUID.randomUUID() + "_" + photoFileName;
+
+            Files.copy(photo.getInputStream(), Paths.get(photoPath), StandardCopyOption.REPLACE_EXISTING);
+            photoPaths.add(photoPath);
+        }
+        existingFutureProgram.setPhotoPath(photoPaths);
+        programRepository.save(existingFutureProgram);
+    }
+
+    public void deleteFutureProgram(Long id) {
         programRepository.deleteById(id);
     }
-
-
-
-
 
 }

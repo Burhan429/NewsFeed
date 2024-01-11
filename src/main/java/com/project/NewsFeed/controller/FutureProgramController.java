@@ -5,6 +5,8 @@ import com.project.NewsFeed.repository.FutureProgramRepository;
 import com.project.NewsFeed.service.FutureProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import com.project.NewsFeed.service.FutureProgramService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,57 +15,45 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/FutureProgram")
 public class FutureProgramController {
     @Autowired
-    FutureProgramService programService;
-    @Autowired
-    FutureProgramRepository programRepository;
-
-@PostMapping("/post")
-public ResponseEntity<String> addProgram(@RequestParam("title") String title,
+    private FutureProgramService programService;
+    @PostMapping("/createFutureProgram")
+    public ResponseEntity<String> createFutureProgram(@RequestParam("title") String title,
                                               @RequestParam("link") String link,
                                               @RequestParam("description") String description,
-                                              @RequestParam("photo") MultipartFile photo) throws IOException {
-    programService.addProgram(title, description, photo,link);
-    return ResponseEntity.ok("Newsfeed item added successfully");
-}
-
-    @GetMapping("/getProgramById/{id}")
-    public FutureProgram getProgramById(@PathVariable long id) {
-        return programService.getProgramById(id);
-
-    }
-    @GetMapping("/get-all")
-    public ResponseEntity<List <FutureProgram> > getAllPrograms() {
-        List<FutureProgram> programs = programService.getAllPrograms();
-        return new ResponseEntity<>(programs, HttpStatus.OK);
+                                              @RequestParam("photo") List<MultipartFile> photo) throws IOException {
+        programService.createFutureProgram(title, description, photo, link);
+        return ResponseEntity.ok("Future Program added successfully");
     }
 
-    @PutMapping("/updateProgram/{id}")
-    public ResponseEntity<String> updateProgram(
-            @RequestParam long id ,
+    @GetMapping("/listOfFuturePrograms")
+    public ResponseEntity<List<FutureProgram>> getAllFuturePrograms() {
+        List<FutureProgram> FutureProgramList = programService.getAllFuturePrograms();
+        return ResponseEntity.ok(FutureProgramList);
+    }
+    @GetMapping("/getFutureProgram/{id}")
+    public ResponseEntity<FutureProgram> getFutureProgram(@PathVariable Long id){
+        FutureProgram futureProgram = programService.getFutureProgram(id);
+        return ResponseEntity.ok(futureProgram);
+    }
+    @PutMapping("/updateFutureProgram/{id}")
+    public ResponseEntity<String> updateFutureProgram(
+            @PathVariable Long id,
             @RequestParam String title,
             @RequestParam String description,
-            @RequestParam MultipartFile photo,
-            @RequestParam String link
-    ) {
-        try {
-            programService.updateById(id , title, description, photo, link);
-            return new ResponseEntity<>("Program updated successfully", HttpStatus.OK);
-        } catch (IOException e) {
-            return new ResponseEntity<>("Error updating program: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+            @RequestParam String link,
+            @RequestParam("photo") List<MultipartFile> photo) throws IOException {
 
-    @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> deleteProgram(@PathVariable Long id) {
-        try {
-            programService.deleteById(id);
-            return new ResponseEntity<>("Program deleted successfully", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error deleting program: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+        programService.updatedFutureProgram(id, title, description, link, photo);
+        return ResponseEntity.ok("Future Program Updated Successfully_______id : " +id);
 
+    }
+    @DeleteMapping("/deleteFutureProgram/{id}")
+    public ResponseEntity<String> deleteFutureProgram(@PathVariable Long id){
+        programService.deleteFutureProgram(id);
+        return ResponseEntity.ok("Future Program  Deleted Successfully_______id : " +id);
+    }
 
 }
