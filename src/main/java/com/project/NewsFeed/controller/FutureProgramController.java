@@ -1,23 +1,16 @@
 package com.project.NewsFeed.controller;
 
-import com.project.NewsFeed.entity.Event;
 import com.project.NewsFeed.entity.FutureProgram;
-import com.project.NewsFeed.model.EventRequest;
-import com.project.NewsFeed.model.FutureProgramRequest;
 import com.project.NewsFeed.repository.FutureProgramRepository;
 import com.project.NewsFeed.service.FutureProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
 
 @RestController
 public class FutureProgramController {
